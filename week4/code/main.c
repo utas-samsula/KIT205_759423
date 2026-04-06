@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include <time.h>
 
 // KIT205 week 4 lab - timing functions to check big O predictions
