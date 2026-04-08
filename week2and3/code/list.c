@@ -1,11 +1,13 @@
  #include "list.h"
 
+// makes an empty list, just sets head to null
 List new_list() {
     List temp;
     temp.head = NULL;
     return temp;
 }
 
+// walks through and prints each value
 void print_list(List *self) {
     ListNodePtr current = self->head;
     while (current != NULL) {
@@ -17,6 +19,7 @@ void print_list(List *self) {
     printf("\n");
 }
 
+// adds new node at the start, easiest and fastest way to insert
 void insert_at_front(List *self, int data) {
     ListNodePtr new_node = malloc(sizeof *new_node);
     new_node->data = data;
@@ -24,6 +27,7 @@ void insert_at_front(List *self, int data) {
     self->head = new_node;
 }
 
+// inserts in the right spot to keep list sorted
 void insert_in_order(List *self, int data) {
     ListNodePtr current = self->head;
     ListNodePtr prev = NULL;
@@ -32,6 +36,7 @@ void insert_in_order(List *self, int data) {
     new_node->data = data;
     new_node->next = NULL;
 
+    // find where to put it
     while (current != NULL && current->data < data) {
         prev = current;
         current = current->next;
@@ -46,6 +51,7 @@ void insert_in_order(List *self, int data) {
     }
 }
 
+// removes all nodes that match the value
 void delete_list(List *self, int data) {
     ListNodePtr current = self->head;
     ListNodePtr prev = NULL;
@@ -68,6 +74,7 @@ void delete_list(List *self, int data) {
     }
 }
 
+// frees every node, important to avoid memory leaks
 void destroy_list(List *self) {
     ListNodePtr current = self->head;
     while (current != NULL) {
@@ -78,8 +85,8 @@ void destroy_list(List *self) {
     self->head = NULL;
 }
 
-// reverse - builds a new list by inserting each node at front
-// so the order flips naturally
+// builds a new list by inserting each element at the front
+// so naturally comes out reversed
 List reverse(List *self) {
     List result = new_list();
     ListNodePtr current = self->head;
@@ -90,8 +97,8 @@ List reverse(List *self) {
     return result;
 }
 
-// merge - takes two sorted lists and combines into one sorted list
-// walks both lists simultaneously picking the smaller value each time
+// merges two sorted lists into one sorted list
+// goes through both at the same time, picks smaller each step
 List merge(List *list1, List *list2) {
     List merged = new_list();
     ListNodePtr c1 = list1->head;
@@ -106,6 +113,7 @@ List merge(List *list1, List *list2) {
             c2 = c2->next;
         }
     }
+    // add whatever is left over
     while (c1 != NULL) {
         insert_in_order(&merged, c1->data);
         c1 = c1->next;
@@ -117,10 +125,10 @@ List merge(List *list1, List *list2) {
     return merged;
 }
 
-// option functions for the adhoc menu
+// helper functions for the menu
 void option_insert(List *my_list) {
     int val;
-    printf("enter number to insert: ");
+    printf("enter a number: ");
     scanf("%d", &val);
     insert_at_front(my_list, val);
 }
@@ -133,37 +141,40 @@ void option_delete(List *my_list) {
 }
 
 void option_print(List *my_list) {
-    printf("list: ");
     print_list(my_list);
 }
 
-// list_test - unit tests for every function including edge cases
 void list_test() {
-    printf("=== Testing insert_at_front ===\n");
-    List l1 = new_list();
-    insert_at_front(&l1, 5);
-    insert_at_front(&l1, 3);
-    insert_at_front(&l1, 7);
-    insert_at_front(&l1, 2);
-    insert_at_front(&l1, 0);
-    printf("Expected: 0, 2, 7, 3, 5\n");
-    printf("Result:   ");
-    print_list(&l1);
-    destroy_list(&l1);
 
-    printf("\n=== Testing insert_in_order ===\n");
+    // testing insert at front
+    // tutorial said to insert 5,3,7,2,0 and expect 0,2,7,3,5
+    printf("Testing insert_at_front... \n");
+    List l = new_list();
+    insert_at_front(&l, 5);
+    insert_at_front(&l, 3);
+    insert_at_front(&l, 7);
+    insert_at_front(&l, 2);
+    insert_at_front(&l, 0);
+    printf("Expected: 0, 2, 7, 3, 5 \n");
+    printf(" Result: ");
+    print_list(&l);
+    destroy_list(&l);
+
+    // testing insert in order
+    printf("\nTesting insert_in_order... \n");
     List l2 = new_list();
     insert_in_order(&l2, 5);
     insert_in_order(&l2, 1);
     insert_in_order(&l2, 8);
     insert_in_order(&l2, 3);
-    insert_in_order(&l2, 3); // duplicate
-    printf("Expected: 1, 3, 3, 5, 8\n");
-    printf("Result:   ");
+    insert_in_order(&l2, 3);
+    printf("Expected: 1, 3, 3, 5, 8 \n");
+    printf(" Result: ");
     print_list(&l2);
     destroy_list(&l2);
 
-    printf("\n=== Testing delete_list ===\n");
+    // testing delete - need to check front middle and end cases
+    printf("\nTesting delete_list... \n");
     List l3 = new_list();
     insert_in_order(&l3, 1);
     insert_in_order(&l3, 2);
@@ -171,42 +182,45 @@ void list_test() {
     insert_in_order(&l3, 4);
     insert_in_order(&l3, 5);
 
-    delete_list(&l3, 1); // front
-    printf("delete front (1) - Expected: 2, 3, 4, 5\n");
-    printf("Result: ");
+    delete_list(&l3, 1);
+    printf("deleted front (1) - Expected: 2, 3, 4, 5\n");
+    printf(" Result: ");
     print_list(&l3);
 
-    delete_list(&l3, 3); // middle
-    printf("delete middle (3) - Expected: 2, 4, 5\n");
-    printf("Result: ");
+    delete_list(&l3, 3);
+    printf("deleted middle (3) - Expected: 2, 4, 5\n");
+    printf(" Result: ");
     print_list(&l3);
 
-    delete_list(&l3, 5); // end
-    printf("delete end (5) - Expected: 2, 4\n");
-    printf("Result: ");
+    delete_list(&l3, 5);
+    printf("deleted end (5) - Expected: 2, 4\n");
+    printf(" Result: ");
     print_list(&l3);
 
-    delete_list(&l3, 99); // value not in list
-    printf("delete missing (99) - Expected: 2, 4\n");
-    printf("Result: ");
+    // what happens if the value isnt in the list
+    delete_list(&l3, 99);
+    printf("deleted missing (99) - Expected: 2, 4\n");
+    printf(" Result: ");
     print_list(&l3);
     destroy_list(&l3);
 
-    printf("\n=== Testing reverse ===\n");
+    // testing reverse
+    printf("\nTesting reverse... \n");
     List l4 = new_list();
     insert_at_front(&l4, 3);
     insert_at_front(&l4, 2);
     insert_at_front(&l4, 1);
-    printf("Original: ");
+    printf("original: ");
     print_list(&l4);
     List rev = reverse(&l4);
     printf("Expected: 3, 2, 1\n");
-    printf("Result:   ");
+    printf(" Result: ");
     print_list(&rev);
     destroy_list(&l4);
     destroy_list(&rev);
 
-    printf("\n=== Testing merge ===\n");
+    // testing merge with two sorted lists
+    printf("\nTesting merge... \n");
     List a = new_list();
     List b = new_list();
     insert_in_order(&a, 1);
@@ -215,20 +229,19 @@ void list_test() {
     insert_in_order(&b, 2);
     insert_in_order(&b, 4);
     insert_in_order(&b, 6);
-    printf("List a: ");
+    printf("list a: ");
     print_list(&a);
-    printf("List b: ");
+    printf("list b: ");
     print_list(&b);
     List m = merge(&a, &b);
     printf("Expected: 1, 2, 3, 4, 5, 6\n");
-    printf("Result:   ");
+    printf(" Result: ");
     print_list(&m);
     destroy_list(&a);
     destroy_list(&b);
     destroy_list(&m);
 }
 
-// adhoc test - interactive menu driven testing
 void list_adhoc_test() {
     List my_list = new_list();
     int quit = 0;

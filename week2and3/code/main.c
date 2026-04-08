@@ -2,10 +2,9 @@
 
 int main() {
 
-    // run unit tests
     list_test();
 
-    // uncomment to run interactive menu instead
+    // uncomment to try the interactive menu
     // list_adhoc_test();
 
     return 0;
